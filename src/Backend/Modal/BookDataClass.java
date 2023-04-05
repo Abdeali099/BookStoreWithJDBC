@@ -11,6 +11,18 @@ public class BookDataClass implements Serializable {
     private int bookId,bookPrice=200,bookQuantity=1,totalCost=bookPrice*bookQuantity;
     private String bookName,bookSubject,authorName,dateOfPublication,publication,bookCoverPath="src\\assets\\byDefaultCover.jpg";
 
+    public BookDataClass(int bookId, String bookName, String bookSubject, String authorName, String publication, String dateOfPublication, int bookPrice, int bookQuantity, int totalCost, String bookCoverPath) {
+        this.bookId = bookId;
+        this.bookPrice = bookPrice;
+        this.bookQuantity = bookQuantity;
+        this.totalCost = totalCost;
+        this.bookName = bookName;
+        this.bookSubject = bookSubject;
+        this.authorName = authorName;
+        this.dateOfPublication = dateOfPublication;
+        this.publication = publication;
+        this.bookCoverPath = bookCoverPath;
+    }
 
     public int getBookId() {
         return bookId;

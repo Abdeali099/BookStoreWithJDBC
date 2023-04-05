@@ -2,8 +2,11 @@
 
 package Backend.Listener;
 
+import Backend.DataBaseConnection.CreateConnection;
 import Frontend.BookStore;
 import javax.swing.*;
+import java.sql.Connection;
+
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 public class WindowClosingListener {
@@ -23,7 +26,15 @@ public class WindowClosingListener {
             * */
 
              if (userChoice==0) {
-//               bookStore.dispose();
+
+                 /* Close connection With DataBase */
+                 try {
+                     Connection connection = CreateConnection.getConnection();
+                     connection.close();
+                 } catch (Exception e) {
+                     System.out.println("Error at closing Connection : " + e);
+                 }
+
                  System.exit(0);
              }
 

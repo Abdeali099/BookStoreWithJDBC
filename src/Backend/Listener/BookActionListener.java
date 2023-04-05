@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -133,32 +134,46 @@ public class BookActionListener implements ActionListener {
         /* This method call from BookStore constructor only for one time */
         try {
 
+            /* Execute Fetch All Prepared Statement */
+            ResultSet resultSet=psFetchAllData.executeQuery();
 
-            if (bookDataClassArrayList == null) {
+            if (resultSet == null) {
                 return;
             }
 
-            /* <--- Adding it to JTable Row ---> */
+            /* 1) Iterate resultSet
+            *  2) Create New Object of BookDataClass
+            *  3) Adding it to ArrayList
+            *  4) Adding it to JTable */
 
-            /* Referencing Table Modal */
-            DefaultTableModel tableModel = bookStore.bookTable.defaultTableModel;
+            BookDataClass fetchedBookDataClass=null;
 
-            /* mapping / Iterating arraylist */
-            bookDataClassArrayList.forEach(bookDataClass -> {
+            while (resultSet.next()) {
 
-                bookId = bookDataClass.getBookId();
+                /* Step 1 :  Fetching Data from Result set */
+                bookId = resultSet.getInt(1);
                 idOfBooks.add(bookId); /* Adding book ID in array list , helpful in validation */
 
-                bookName = bookDataClass.getBookName();
-                bookSubject = bookDataClass.getBookSubject();
-                authorName = bookDataClass.getAuthorName();
-                publication = bookDataClass.getPublication();
-                dateOfPublication = bookDataClass.getDateOfPublication();
-                bookPrice = bookDataClass.getBookPrice();
-                bookQuantity = bookDataClass.getBookQuantity();
-                totalCost = bookDataClass.getTotalCost();
+                bookName = resultSet.getString(2);
+                bookSubject = resultSet.getString(3);
+                authorName =resultSet.getString(4);
+                publication = resultSet.getString(5);
+                dateOfPublication = String.valueOf((resultSet.getDate(6)));
+                bookPrice = resultSet.getInt(6);
+                bookQuantity = resultSet.getInt(7);
+                totalCost =resultSet.getInt(8);
+                bookCoverPath = resultSet.getString(10);
 
-                bookCoverPath = bookDataClass.getBookCoverPath();
+                /* Step 2 :  Creating an Object of BookDataClass */
+                fetchedBookDataClass = new BookDataClass(bookId,bookName,bookSubject,authorName,publication,dateOfPublication,bookPrice,bookQuantity,totalCost,bookCoverPath);
+
+                /* Step 3 : Adding it to ArrayList */
+                bookDataClassArrayList.add(fetchedBookDataClass);
+
+                /* Step 4 : Adding it to JTable Row */
+
+                /* Referencing Table Modal */
+                DefaultTableModel tableModel = bookStore.bookTable.defaultTableModel;
 
                 /* Setting Image to row */
                 JLabel imgLabelInRow=new JLabel();
@@ -171,9 +186,7 @@ public class BookActionListener implements ActionListener {
 
                 /* Adding One Row */
                 tableModel.addRow(dataOfRow);
-
-            });
-
+            }
         } catch (Exception e) {
             System.out.println("Error  at Fetching data Listener : " + e.getMessage());
         }//catch close

@@ -106,23 +106,14 @@ public class BookStore extends JFrame {
         mainPanel.add(bookTable);
 
         /* Here I am Adding Logical Code (which is not suitable)
-         * What ? : Fetched all Data from file whenever New Window  / Program starts
+         * What ? : Fetched all Data from DataBase whenever New Window  / Program starts
          *  */
 
         try {
             BookActionListener fetchData =new BookActionListener(this);
             fetchData.FetchAllBooks();
         } catch (Exception e) {
-            System.out.println("Error  at Fetching from frontend : " + e.getMessage());
-        }
-
-        /* Connecting with DataBase */
-
-        try {
-            Connection connection= CreateConnection.getConnection();
-            System.out.println(connection);
-        } catch (Exception e) {
-            System.out.println("Error  at Connecting to Database from frontend : " + e.getMessage());
+            System.out.println("Error at Fetching from frontend : " + e.getMessage());
         }
 
         /* Setting Image Icon at Title Bar */

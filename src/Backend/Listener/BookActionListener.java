@@ -16,6 +16,7 @@
 package Backend.Listener;
 
 import Backend.Controller.PerformOperationOnBookData;
+import Backend.DataBaseConnection.CreateConnection;
 import Backend.Modal.BookDataClass;
 import Frontend.BookStore;
 import Frontend.Helpers.Toast;
@@ -26,6 +27,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,8 +49,13 @@ public class BookActionListener implements ActionListener {
     public static ArrayList<Integer> idOfBooks;
 
     /* Flags to know what had done ? : Add|Delete|Update (Cancel is not necessary)*/
-
     public static boolean  addBookDone,updateBookDone,deleteBookDone,saveAllChangesDone;
+
+    /* Connection of Book */
+    private static Connection connectionOfDataBase=null;
+
+    /*  <----- Prepared Statements ------> */
+    PreparedStatement psFetchAllData,psAddOneBookData,psDeleteOneBookData,psUpdateOneBookData;
 
     /* Actual data of Book Data (Modal) */
     private int bookId,bookPrice=200,bookQuantity=1,totalCost=bookPrice*bookQuantity;
@@ -58,6 +66,45 @@ public class BookActionListener implements ActionListener {
         performOperationOnBookData =new PerformOperationOnBookData();
         bookDataClassArrayList=new ArrayList<>();
         idOfBooks=new ArrayList<>();
+
+        /* Connecting with DataBase  (It Is Static ) */
+
+        try {
+            connectionOfDataBase= CreateConnection.getConnection();
+            System.out.println(connectionOfDataBase);
+        } catch (Exception e) {
+            System.out.println("Error  at Connecting to Database from frontend : " + e.getMessage());
+        }
+
+        /*  <---- Preparing a Statement ----> */
+
+        /* <- Fetching  data  --> */
+        try {
+            psFetchAllData = connectionOfDataBase.prepareStatement("SELECT * FROM BookData");
+        } catch (Exception e) {
+            System.out.println("Error at Preparing Statement for fetching data : " + e.getMessage());
+        }
+
+        /* <- Adding Data --> */
+        try {
+            psAddOneBookData = connectionOfDataBase.prepareStatement("INSERT INTO BookData VALUES(?,?,?,?,?,?,?,?,?,?) ;");
+        } catch (Exception e) {
+            System.out.println("Error at Preparing Statement for Adding data : " + e.getMessage());
+        }
+
+        /* <- Updating Data --> */
+        try {
+            psUpdateOneBookData = connectionOfDataBase.prepareStatement("UPDATE BookData SET BookName=?,BookSubject=?,AuthorName=?,Publication=?,DateOfPublication=?,Price=?,Quantity=?,TotalCost=?,BookCoverPath=?) WHERE ID=?;");
+        } catch (Exception e) {
+            System.out.println("Error at Preparing Statement for Updating data : " + e.getMessage());
+        }
+
+        /* <-- Delete Data --> */
+        try {
+            psDeleteOneBookData = connectionOfDataBase.prepareStatement("DELETE FROM BookData WHERE ID=? ;");
+        } catch (Exception e) {
+            System.out.println("Error at Preparing Statement for Deleting data : " + e.getMessage());
+        }
 
         addBookDone=false;
         updateBookDone=false;
@@ -86,8 +133,6 @@ public class BookActionListener implements ActionListener {
         /* This method call from BookStore constructor only for one time */
         try {
 
-            /* Taking data from Controller : Not direct calling File method */
-            bookDataClassArrayList = performOperationOnBookData.fetchAllStoredData();
 
             if (bookDataClassArrayList == null) {
                 return;
@@ -398,7 +443,10 @@ public class BookActionListener implements ActionListener {
         Image img = bookCoverIcon.getImage().getScaledInstance(bookCoverImage.getWidth(), bookCoverImage.getHeight(), Image.SCALE_SMOOTH);
         bookCoverImage.setIcon(new ImageIcon(img));
 
+        if (!pathOfBookCover.equals("src\\assets\\byDefaultCover.jpg")) {
         ShowToastOnOpeartion("Image Browse Successfully!!");
+        }
+
     }
 
     private void clearInputFields() {

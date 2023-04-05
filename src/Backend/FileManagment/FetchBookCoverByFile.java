@@ -7,7 +7,7 @@ import java.io.File;
 public class FetchBookCoverByFile {
 
     public static String fetchBookCoverFromDevice() {
-        String bookPathCover="src\\assets\\bookCover.png";
+        String bookPathCover="src\\assets\\byDefaultCover.jpg";
 
         try {
             /* File Chooser Prompt */

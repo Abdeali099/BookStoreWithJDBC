@@ -6,11 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="4e965bfa-8673-4709-b211-a3467f1919f0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Backend/Controller/OperationsOnBookData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Backend/Controller/OperationsOnBookData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Backend/Controller/PerformOperationOnBookData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Backend/Controller/PerformOperationOnBookData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Backend/FileManagment/FetchBookCoverByFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Backend/FileManagment/FetchBookCoverByFile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Backend/FileManagment/ReadBookFromFile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Backend/FileManagment/SavePermanentInFile.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Backend/Listener/BookActionListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Backend/Listener/BookActionListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Backend/Listener/BookKeyListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Backend/Listener/WindowClosingListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Backend/Listener/WindowClosingListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Frontend/BooksPanel/AddBookPanel/AddBookPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/BooksPanel/AddBookPanel/AddBookPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Frontend/BooksPanel/AddBookPanel/OperationButtonPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/BooksPanel/AddBookPanel/OperationButtonPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Frontend/BookStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/BookStore.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,13 +78,21 @@
       <option name="project" value="LOCAL" />
       <updated>1680693787601</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Changes in FrontEnd">
+      <created>1680700336755</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1680700336755</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added New Structure" />
     <MESSAGE value="Initial Commit" />
     <MESSAGE value="Established Connection" />
-    <option name="LAST_COMMIT_MESSAGE" value="Established Connection" />
+    <MESSAGE value="Changes in FrontEnd" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes in FrontEnd" />
   </component>
 </project>

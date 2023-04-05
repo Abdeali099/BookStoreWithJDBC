@@ -1,5 +1,6 @@
 package Frontend;
 
+import Backend.DataBaseConnection.CreateConnection;
 import Backend.Listener.BookActionListener;
 import Backend.Listener.WindowClosingListener;
 import Frontend.BooksPanel.AddBookPanel.AddBookPanel;
@@ -10,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.Connection;
 
 /* It is a Main Frame */
 public class BookStore extends JFrame {
@@ -112,6 +114,15 @@ public class BookStore extends JFrame {
             fetchData.FetchAllBooks();
         } catch (Exception e) {
             System.out.println("Error  at Fetching from frontend : " + e.getMessage());
+        }
+
+        /* Connecting with DataBase */
+
+        try {
+            Connection connection= CreateConnection.getConnection();
+            System.out.println(connection);
+        } catch (Exception e) {
+            System.out.println("Error  at Connecting to Database from frontend : " + e.getMessage());
         }
 
         /* Setting Image Icon at Title Bar */

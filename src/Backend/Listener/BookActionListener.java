@@ -71,7 +71,6 @@ public class BookActionListener implements ActionListener {
         String operationHappen=event.getActionCommand();
 
         switch (operationHappen) {
-            case "Save" -> saveAllChanges();
             case "Add" -> doAddOperation();
             case "Update" -> doUpdateOperation();
             case "Delete" -> doDeleteOperation();
@@ -82,35 +81,6 @@ public class BookActionListener implements ActionListener {
     }
 
     /* User defined methods - by Abdeali */
-
-    public void saveAllChanges() {
-
-            if (!(addBookDone || deleteBookDone || updateBookDone)) {
-                JOptionPane.showMessageDialog(null,"No data for saving!!","Error",JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-        /* send to controller to Save changes Permanently */
-        saveAllChangesDone =  performOperationOnBookData.SaveToFilePermanently(bookDataClassArrayList);
-
-        if (!saveAllChangesDone) {
-            JOptionPane.showMessageDialog(null,"Error In saving File!!","Error",JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        /* Set Title */
-        BookKeyListener.TitleFlag=false;
-        bookStore.setTitle("Book Store");
-
-        /* reset flag of update , add and delete */
-        addBookDone=false;
-        deleteBookDone=false;
-        updateBookDone=false;
-
-        /* Here give Toast */
-        ShowToastOnOpeartion("Data saved Successfully in database!!");
-
-    }
 
     public void FetchAllBooks(){
         /* This method call from BookStore constructor only for one time */
@@ -226,9 +196,6 @@ public class BookActionListener implements ActionListener {
             /* Updating status of add */
             addBookDone=true;
 
-            /* Set Title */
-            bookStore.setTitle("*Book Store (Unsaved)");
-
             clearInputFields();
 
             ShowToastOnOpeartion("Data added Successfully (Not saved in database) !!");
@@ -317,8 +284,8 @@ public class BookActionListener implements ActionListener {
         /* Updating status of deletion */
         updateBookDone=true;
 
-        /* Set Title */
-        bookStore.setTitle("*Book Store (Unsaved)");
+        
+        
 
         clearInputFields();
 
@@ -368,8 +335,8 @@ public class BookActionListener implements ActionListener {
         /* Also from ArrayList */
         bookDataClassArrayList.remove(rowSelected);
 
-        /* Set Title */
-        bookStore.setTitle("*Book Store (Unsaved)");
+        
+        
 
         /* Updating status of deletion */
         deleteBookDone=true;

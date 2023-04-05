@@ -16,23 +16,14 @@ public class OperationButtonPanel extends JPanel {
     BookActionListener bookActionListener;
 
     /* Component */
-    public JButton btnSave,btnAdd, btnCancel, btnDelete, btnUpdate;
-    ImageIcon saveIcon,addIcon, updateIcon, cancelIcon, deleteIcon;
+    public JButton btnAdd, btnCancel, btnDelete, btnUpdate;
+    ImageIcon addIcon, updateIcon, cancelIcon, deleteIcon;
 
     OperationButtonPanel(BookStore mainContainer) {
         this.mainContainer = mainContainer;
 
         /* Intialize Listener */
         bookActionListener = new BookActionListener(mainContainer);
-
-        /* Button 0 : Save All changes */
-        saveIcon = new ImageIcon("src\\assets\\saveIcon.png");
-        btnSave = new JButton("Save", saveIcon);
-        btnSave.setFont(new Font("Arial Rounded MT", Font.PLAIN, 22));
-        btnSave.setForeground(new Color(255, 255, 255));
-        btnSave.setBackground(new Color(0, 103, 184));
-        btnSave.addActionListener(bookActionListener);
-        this.add(btnSave);
 
         /* Button 1 : Add */
         addIcon = new ImageIcon("src\\assets\\addIcon.png");

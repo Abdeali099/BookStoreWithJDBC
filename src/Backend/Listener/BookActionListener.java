@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,9 +49,6 @@ public class BookActionListener implements ActionListener {
 
     /* ArrayList for BookId (Helps to check ID is not assign already) */
     public static ArrayList<Integer> idOfBooks;
-
-    /* Flags to know what had done ? : Add|Delete|Update (Cancel is not necessary)*/
-    public static boolean  addBookDone,updateBookDone,deleteBookDone,saveAllChangesDone;
 
     /* Connection of Book */
     private static Connection connectionOfDataBase=null;
@@ -91,7 +89,7 @@ public class BookActionListener implements ActionListener {
 
         /* <- Updating Data --> */
         try {
-            psUpdateOneBookData = connectionOfDataBase.prepareStatement("UPDATE BookData SET BookName=?,BookSubject=?,AuthorName=?,Publication=?,DateOfPublication=?,Price=?,Quantity=?,TotalCost=?,BookCoverPath=?) WHERE ID=?;");
+            psUpdateOneBookData = connectionOfDataBase.prepareStatement("UPDATE BookData SET BookName=?,BookSubject=?,AuthorName=?,Publication=?,DateOfPublication=?,Price=?,Quantity=?,TotalCost=?,BookCoverPath=? WHERE ID=?;");
         } catch (Exception e) {
             System.out.println("Error at Preparing Statement for Updating data : " + e.getMessage());
         }
@@ -103,10 +101,6 @@ public class BookActionListener implements ActionListener {
             System.out.println("Error at Preparing Statement for Deleting data : " + e.getMessage());
         }
 
-        addBookDone=false;
-        updateBookDone=false;
-        deleteBookDone=false;
-        saveAllChangesDone=false;
     }
     public BookActionListener(BookStore bookStore) {
         this.bookStore = bookStore;
@@ -118,24 +112,32 @@ public class BookActionListener implements ActionListener {
 
         String operationHappen=event.getActionCommand();
 
-        switch (operationHappen) {
-            case "Add" -> doAddOperation();
-            case "Update" -> doUpdateOperation();
-            case "Delete" -> doDeleteOperation();
-            case "Cancel" -> doCancelOperation();
-            case "Cover" -> browseCover();
+        try {
+
+            switch (operationHappen) {
+
+                case "Add" -> doAddOperation();
+                case "Update" -> doUpdateOperation();
+                case "Delete" -> doDeleteOperation();
+                case "Cancel" -> doCancelOperation();
+                case "Cover" -> browseCover();
+            }
+        } catch (Exception e) {
+            System.out.println("error at calling functions  : " + e);
         }
 
     }
 
     /* User defined methods - by Abdeali */
 
-    public void FetchAllBooks(){
+    public void FetchAllBooks() throws SQLException {
         /* This method call from BookStore constructor only for one time */
+        ResultSet resultSet=null;
+                
         try {
 
             /* Execute Fetch All Prepared Statement */
-            ResultSet resultSet=psFetchAllData.executeQuery();
+            resultSet=psFetchAllData.executeQuery();
 
             if (resultSet == null) {
                 return;
@@ -191,17 +193,60 @@ public class BookActionListener implements ActionListener {
         } catch (Exception e) {
             System.out.println("Error  at Fetching data Listener : " + e.getMessage());
         }//catch close
-    }
+        finally {
+            psFetchAllData.close();
+            if (resultSet!=null) {
+                resultSet.close();
+            }
+        }//finally close
+    
+    }//Method close
 
     /* <------------ Adding One data ------------>*/
 
-    private void doAddOperation() {
+    private void doAddOperation() throws SQLException {
 
         /* Checking Validation  */
         boolean shouldGoFurther=checkValidation(0);
 
         if (!shouldGoFurther) {
             return;
+        }
+
+        /* <-- Adding into Database -->*/
+
+        int RowAffected=0;
+
+        try {
+            psAddOneBookData.setInt(1,bookId);
+            psAddOneBookData.setString(2,bookName);
+            psAddOneBookData.setString(3,bookSubject);
+            psAddOneBookData.setString(4,authorName);
+            psAddOneBookData.setString(5,publication);
+
+            java.sql.Date dateSelected=java.sql.Date.valueOf(dateOfPublication); /* Converting String into Sql Date */
+            psAddOneBookData.setDate(6,dateSelected);
+
+            psAddOneBookData.setInt(7,bookPrice);
+            psAddOneBookData.setInt(8,bookQuantity);
+            psAddOneBookData.setInt(9,totalCost);
+            psAddOneBookData.setString(10,bookCoverPath);
+
+            RowAffected=psAddOneBookData.executeUpdate();
+
+            if (RowAffected<=0) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+
+            if (RowAffected<=0) {
+                return;
+            }
+        }//catch close
+        finally {
+            psAddOneBookData.close();
         }
 
         /* Data of Book (Modal) */
@@ -237,46 +282,9 @@ public class BookActionListener implements ActionListener {
             Object[] dataOfRow = {bookId,bookName,bookSubject,authorName,publication,dateOfPublication,bookPrice,bookQuantity,totalCost,imgLabelInRow};
             tableModel.addRow(dataOfRow);
 
-
-            /* <-- Adding into Database -->*/
-
-            int RowAffected=0;
-
-            try {
-                psAddOneBookData.setInt(1,bookId);
-                psAddOneBookData.setString(2,bookName);
-                psAddOneBookData.setString(3,bookSubject);
-                psAddOneBookData.setString(4,authorName);
-                psAddOneBookData.setString(5,publication);
-
-                java.sql.Date dateSelected=java.sql.Date.valueOf(dateOfPublication); /* Converting String into Sql Date */
-                psAddOneBookData.setDate(6,dateSelected);
-
-                psAddOneBookData.setInt(7,bookPrice);
-                psAddOneBookData.setInt(8,bookQuantity);
-                psAddOneBookData.setInt(9,totalCost);
-                psAddOneBookData.setString(10,bookCoverPath);
-
-                RowAffected=psAddOneBookData.executeUpdate();
-
-                if (RowAffected<=0) {
-                    return;
-                }
-
-            } catch (Exception e) {
-                System.out.println(e);
-
-                if (RowAffected<=0) {
-                    return;
-                }
-            }
-
-            /* Updating status of add */
-            addBookDone=true;
-
             clearInputFields();
 
-            ShowToastOnOperation("Data added Successfully (Not saved in database) !!");
+            ShowToastOnOperation("Data added Successfully  !!");
 
         } catch (Exception e) {
             System.out.println("Error  at listener Add : " + e.getMessage());
@@ -284,84 +292,115 @@ public class BookActionListener implements ActionListener {
 
     }
 
-    private void doUpdateOperation() {
+    /* <------------ Updating One data ------------>*/
+
+    private void doUpdateOperation() throws SQLException {
 
         int rowSelected=RowSelectionListener.selectedRow;
+        int rowAffected=0;
 
-        /* Check Whether Row is selected or Not */
-        if (rowSelected<0) {
-            JOptionPane.showMessageDialog(null,"No row is selected!!","Error",JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        try {
 
-        /* Taking confirmation */
-        int input = JOptionPane.showConfirmDialog(null, "Are you sure to update?", "Update", JOptionPane.YES_NO_OPTION);
-        // input : 0=yes, 1=no
+            /* Check Whether Row is selected or Not */
+            if (rowSelected < 0) {
+                JOptionPane.showMessageDialog(null, "No row is selected!!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (input == 1 || input == -1) {
-            /* DeSelect row */
-            bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
+            /* Taking confirmation */
+            int input = JOptionPane.showConfirmDialog(null, "Are you sure to update?", "Update", JOptionPane.YES_NO_OPTION);
+            // input : 0=yes, 1=no
+
+            if (input == 1 || input == -1) {
+                /* DeSelect row */
+                bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
+
+                clearInputFields();
+
+                /* Reset ID Field which  was changed when Row selected */
+                bookStore.addBookPanel.tfBookID.setEditable(true);
+                Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
+                bookStore.addBookPanel.tfBookID.setCursor(cursor);
+
+                return;
+            }
+            /* Checking Validation  */
+            boolean shouldGoFurther = checkValidation(1);
+
+            if (!shouldGoFurther) {
+                return;
+            }
+
+            /* <----------  Updating from Database  ----------> */
+
+            /* <-- Setting Values --> */
+
+            psUpdateOneBookData.setString(1,bookName);
+            psUpdateOneBookData.setString(2,bookSubject);
+            psUpdateOneBookData.setString(3,authorName);
+            psUpdateOneBookData.setString(4,publication);
+
+            java.sql.Date dateSelected=java.sql.Date.valueOf(dateOfPublication); /* Converting String into Sql Date */
+            psUpdateOneBookData.setDate(5,dateSelected);
+
+            psUpdateOneBookData.setInt(6,bookPrice);
+            psUpdateOneBookData.setInt(7,bookQuantity);
+            psUpdateOneBookData.setInt(8,totalCost);
+            psUpdateOneBookData.setString(9,bookCoverPath);
+
+            psUpdateOneBookData.setInt(10,bookId); /*Where clause */
+
+            rowAffected=psUpdateOneBookData.executeUpdate();
+
+            if (rowAffected <= 0) {
+                return;
+            }
+
+            /*  <---------- if ( Selected & confirmed ) then Update it to JTable  ---------- */
+            DefaultTableModel updateTableModel = bookStore.bookTable.defaultTableModel;
+
+            updateTableModel.setValueAt(bookId, rowSelected, 0);
+            updateTableModel.setValueAt(bookName, rowSelected, 1);
+            updateTableModel.setValueAt(bookSubject, rowSelected, 2);
+            updateTableModel.setValueAt(authorName, rowSelected, 3);
+            updateTableModel.setValueAt(publication, rowSelected, 4);
+            updateTableModel.setValueAt(dateOfPublication, rowSelected, 5);
+            updateTableModel.setValueAt(bookPrice, rowSelected, 6);
+            updateTableModel.setValueAt(bookQuantity, rowSelected, 7);
+            updateTableModel.setValueAt(totalCost, rowSelected, 8);
+
+            /* Setting Image to row */
+            JLabel imgLabelInRow = new JLabel();
+            ImageIcon bookCoverIcon = new ImageIcon(bookCoverPath);
+            Image img = bookCoverIcon.getImage().getScaledInstance(120, 80, Image.SCALE_SMOOTH);
+            imgLabelInRow.setIcon(new ImageIcon(img));
+
+            updateTableModel.setValueAt(imgLabelInRow, rowSelected, 9);
+
+            /*  <---------- Also from ArrayList ----------> */
+
+            BookDataClass updatedBookDataClass = new BookDataClass(bookId, bookName, bookSubject, authorName, publication, dateOfPublication, bookPrice, bookQuantity, totalCost, bookCoverPath);
+            bookDataClassArrayList.set(rowSelected, updatedBookDataClass);
 
             clearInputFields();
+
+            /* DeSelect row */
+            bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
 
             /* Reset ID Field which  was changed when Row selected */
             bookStore.addBookPanel.tfBookID.setEditable(true);
             Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
             bookStore.addBookPanel.tfBookID.setCursor(cursor);
 
-            return;
+            ShowToastOnOperation("Data updated Successfully  !!");
+
+        } catch (Exception e) {
+            System.out.println("Error at updating database : - " + e);
         }
-        /* Checking Validation  */
-        boolean shouldGoFurther=checkValidation(1);
-
-        if (!shouldGoFurther) {
-            return;
+        finally {
+            psUpdateOneBookData.close();
         }
 
-        /* if ( Selected & confirmed ) then Update it to Table*/
-
-        DefaultTableModel updateTableModel=bookStore.bookTable.defaultTableModel;
-
-        updateTableModel.setValueAt(bookId , rowSelected, 0);
-        updateTableModel.setValueAt(bookName , rowSelected, 1);
-        updateTableModel.setValueAt(bookSubject , rowSelected, 2);
-        updateTableModel.setValueAt(authorName , rowSelected, 3);
-        updateTableModel.setValueAt(publication , rowSelected, 4);
-        updateTableModel.setValueAt(dateOfPublication , rowSelected, 5);
-        updateTableModel.setValueAt(bookPrice , rowSelected, 6);
-        updateTableModel.setValueAt(bookQuantity , rowSelected, 7);
-        updateTableModel.setValueAt(totalCost , rowSelected, 8);
-
-
-        /* Setting Image to row */
-        JLabel imgLabelInRow=new JLabel();
-        ImageIcon bookCoverIcon = new ImageIcon(bookCoverPath);
-        Image img = bookCoverIcon.getImage().getScaledInstance(120, 80, Image.SCALE_SMOOTH);
-        imgLabelInRow.setIcon(new ImageIcon(img));
-
-        updateTableModel.setValueAt(imgLabelInRow , rowSelected, 9);
-
-        /* Also from ArrayList */
-
-        BookDataClass updatedBookDataClass = new BookDataClass(bookId,bookName,bookSubject,authorName,publication,dateOfPublication,bookPrice,bookQuantity,totalCost,bookCoverPath);
-
-        bookDataClassArrayList.set(rowSelected,updatedBookDataClass);
-
-        /* Updating status of deletion */
-        updateBookDone=true;
-
-        clearInputFields();
-
-        /* DeSelect row */
-
-        bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
-
-        /* Reset ID Field which  was changed when Row selected */
-        bookStore.addBookPanel.tfBookID.setEditable(true);
-        Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-        bookStore.addBookPanel.tfBookID.setCursor(cursor);
-
-        ShowToastOnOperation("Data updated Successfully (Not saved in database) !!");
 
     }
 
@@ -399,12 +438,6 @@ public class BookActionListener implements ActionListener {
         /* Also from ArrayList */
         bookDataClassArrayList.remove(rowSelected);
 
-        
-        
-
-        /* Updating status of deletion */
-        deleteBookDone=true;
-
         clearInputFields();
 
         /* DeSelect row */
@@ -415,7 +448,7 @@ public class BookActionListener implements ActionListener {
         Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
         bookStore.addBookPanel.tfBookID.setCursor(cursor);
 
-        ShowToastOnOperation("Data deleted Successfully (Not saved in database) !!");
+        ShowToastOnOperation("Data deleted Successfully  !!");
     }
 
     private void doCancelOperation() {

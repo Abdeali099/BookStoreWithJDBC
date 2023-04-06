@@ -56,28 +56,24 @@ public class BookActionListener implements ActionListener {
     private static Connection connectionOfDataBase=null;
 
     /*  <----- Prepared Statements ------> */
-    PreparedStatement psFetchAllData,psAddOneBookData,psDeleteOneBookData,psUpdateOneBookData;
+    private static PreparedStatement psFetchAllData,psAddOneBookData,psDeleteOneBookData,psUpdateOneBookData;
 
     /* Actual data of Book Data (Modal) */
     private int bookId,bookPrice=200,bookQuantity=1,totalCost=bookPrice*bookQuantity;
     private String bookName,bookSubject,authorName,dateOfPublication,publication,bookCoverPath="src\\assets\\byDefaultCover.jpg";
 
-    public BookActionListener(BookStore bookStore) {
-        this.bookStore = bookStore;
-        performOperationOnBookData =new PerformOperationOnBookData();
+    static{
+
         bookDataClassArrayList=new ArrayList<>();
         idOfBooks=new ArrayList<>();
 
-        /* Connecting with DataBase  (It Is Static ) */
-
         try {
             connectionOfDataBase= CreateConnection.getConnection();
-            System.out.println(connectionOfDataBase);
+            System.out.println(" yes here : - "+connectionOfDataBase);
         } catch (Exception e) {
             System.out.println("Error  at Connecting to Database from frontend : " + e.getMessage());
         }
 
-        /*  <---- Preparing a Statement ----> */
 
         /* <- Fetching  data  --> */
         try {
@@ -111,6 +107,10 @@ public class BookActionListener implements ActionListener {
         updateBookDone=false;
         deleteBookDone=false;
         saveAllChangesDone=false;
+    }
+    public BookActionListener(BookStore bookStore) {
+        this.bookStore = bookStore;
+        performOperationOnBookData =new PerformOperationOnBookData();
     }
 
     @Override
@@ -158,10 +158,11 @@ public class BookActionListener implements ActionListener {
                 bookSubject = resultSet.getString(3);
                 authorName =resultSet.getString(4);
                 publication = resultSet.getString(5);
-                dateOfPublication = String.valueOf((resultSet.getDate(6)));
-                bookPrice = resultSet.getInt(6);
-                bookQuantity = resultSet.getInt(7);
-                totalCost =resultSet.getInt(8);
+                Date date = resultSet.getDate(6);
+                dateOfPublication=date.toString();
+                bookPrice = resultSet.getInt(7);
+                bookQuantity = resultSet.getInt(8);
+                totalCost =resultSet.getInt(9);
                 bookCoverPath = resultSet.getString(10);
 
                 /* Step 2 :  Creating an Object of BookDataClass */
@@ -192,6 +193,8 @@ public class BookActionListener implements ActionListener {
         }//catch close
     }
 
+    /* <------------ Adding One data ------------>*/
+
     private void doAddOperation() {
 
         /* Checking Validation  */
@@ -212,7 +215,7 @@ public class BookActionListener implements ActionListener {
 
         /* I have to Add This at 3 Place
          *
-         * 1) In File : By File Management (Cause every time Adding ArrayList is not Good (It is on Controller side)
+         * 1) In DaTaBase
          * 2) In ArrayList
          * 3) Adding data in Table Row.
          * */
@@ -223,8 +226,7 @@ public class BookActionListener implements ActionListener {
                 bookDataClassArrayList=new ArrayList<>();
             }
 
-
-            /* Adding object in arrayList */
+            /* <--- Adding object in arrayList ---> */
             bookDataClassArrayList.add(bookDataClass);
             /* Adding book ID in array list , helpful in validation */
             idOfBooks.add(bookId);
@@ -232,10 +234,42 @@ public class BookActionListener implements ActionListener {
             /* <--- Adding it to JTable Row ---> */
             /* Referencing Table Modal */
             DefaultTableModel tableModel=bookStore.bookTable.defaultTableModel;
-
             Object[] dataOfRow = {bookId,bookName,bookSubject,authorName,publication,dateOfPublication,bookPrice,bookQuantity,totalCost,imgLabelInRow};
-
             tableModel.addRow(dataOfRow);
+
+
+            /* <-- Adding into Database -->*/
+
+            int RowAffected=0;
+
+            try {
+                psAddOneBookData.setInt(1,bookId);
+                psAddOneBookData.setString(2,bookName);
+                psAddOneBookData.setString(3,bookSubject);
+                psAddOneBookData.setString(4,authorName);
+                psAddOneBookData.setString(5,publication);
+
+                java.sql.Date dateSelected=java.sql.Date.valueOf(dateOfPublication); /* Converting String into Sql Date */
+                psAddOneBookData.setDate(6,dateSelected);
+
+                psAddOneBookData.setInt(7,bookPrice);
+                psAddOneBookData.setInt(8,bookQuantity);
+                psAddOneBookData.setInt(9,totalCost);
+                psAddOneBookData.setString(10,bookCoverPath);
+
+                RowAffected=psAddOneBookData.executeUpdate();
+
+                if (RowAffected<=0) {
+                    return;
+                }
+
+            } catch (Exception e) {
+                System.out.println(e);
+
+                if (RowAffected<=0) {
+                    return;
+                }
+            }
 
             /* Updating status of add */
             addBookDone=true;

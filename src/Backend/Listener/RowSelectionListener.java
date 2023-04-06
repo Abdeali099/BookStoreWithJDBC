@@ -62,7 +62,7 @@ public class RowSelectionListener implements ListSelectionListener {
 
                 DateChooser dateChooser = bookStore.addBookPanel.dateChooser;
                 dateChooser.setTextRefernce(bookStore.addBookPanel.tfDatePublication);
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = formatter.parse(String.valueOf(test.get(5)));
                 dateChooser.setSelectedDate(date);
 

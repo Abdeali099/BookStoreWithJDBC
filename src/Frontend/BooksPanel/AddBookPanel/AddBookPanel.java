@@ -178,12 +178,16 @@ public class AddBookPanel extends JPanel {
 
         try {
             dateChooser = new DateChooser();
+            dateChooser.setDateFormat("yyyy-MM-dd");
             dateChooser.setTextRefernce(tfDatePublication);
             dateChooser.setForeground(new Color(0, 103, 184));
-
         } catch (Exception e) {
             System.out.println("Error In calender : " + e + " Msg : " + e.getMessage());
         }
+
+        btnCalender.addActionListener(event -> {
+            dateChooser.showPopup();
+        });
 
         /* Input 7 : Price Of Book */
         lbBookPrice = new JLabel();

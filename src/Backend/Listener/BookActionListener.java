@@ -67,7 +67,6 @@ public class BookActionListener implements ActionListener {
 
         try {
             connectionOfDataBase= CreateConnection.getConnection();
-            System.out.println(" yes here : - "+connectionOfDataBase);
         } catch (Exception e) {
             System.out.println("Error  at Connecting to Database from frontend : " + e.getMessage());
         }
@@ -404,51 +403,75 @@ public class BookActionListener implements ActionListener {
 
     }
 
-    private void doDeleteOperation() {
+    /* <------------ Deleting  One data ------------>*/
+
+    private void doDeleteOperation() throws SQLException {
 
         int rowSelected=RowSelectionListener.selectedRow;
+        int rowAffected=0;
 
-        /* Check Whether Row is selected or Not */
-        if (rowSelected<0) {
-            JOptionPane.showMessageDialog(null,"No row is selected!!","Error",JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        try {
 
-        /* Taking confirmation */
-        int input = JOptionPane.showConfirmDialog(null, "Are you sure to delete?", "Delete", JOptionPane.YES_NO_OPTION);
-        // input : 0=yes, 1=no
+            /* Check Whether Row is selected or Not */
+            if (rowSelected < 0) {
+                JOptionPane.showMessageDialog(null, "No row is selected!!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (input == 1 || input == -1) {
-            /* DeSelect row */
-            bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
+            /* Taking confirmation */
+            int input = JOptionPane.showConfirmDialog(null, "Are you sure to delete?", "Delete", JOptionPane.YES_NO_OPTION);
+            // input : 0=yes, 1=no
+
+            if (input == 1 || input == -1) {
+                /* DeSelect row */
+                bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
+
+                clearInputFields();
+
+                /* Reset ID Field which  was changed when Row selected */
+                bookStore.addBookPanel.tfBookID.setEditable(true);
+                Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
+                bookStore.addBookPanel.tfBookID.setCursor(cursor);
+
+                return;
+            }
+
+            /* <--- Delete  From DataBase ---->  */
+
+            /* Getting Id */
+            int deleteId=bookDataClassArrayList.get(rowSelected).getBookId();
+
+            psDeleteOneBookData.setInt(1,deleteId);
+
+            rowAffected=psDeleteOneBookData.executeUpdate();
+
+            if (rowAffected<=0) {
+                return;
+            }
+
+
+            /* if ( Selected & confirmed ) then Remove it from JTable*/
+            bookStore.bookTable.defaultTableModel.removeRow(rowSelected);
+
+            /* Also from ArrayList */
+            bookDataClassArrayList.remove(rowSelected);
 
             clearInputFields();
+
+            /* DeSelect row */
+            bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
 
             /* Reset ID Field which  was changed when Row selected */
             bookStore.addBookPanel.tfBookID.setEditable(true);
             Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
             bookStore.addBookPanel.tfBookID.setCursor(cursor);
 
-            return;
+            ShowToastOnOperation("Data deleted Successfully  !!");
+
+        } catch (Exception e) {
+            System.out.println("Error at deleting data : " + e);
+            psDeleteOneBookData.close();
         }
-
-        /* if ( Selected & confirmed ) then Remove it from Table*/
-        bookStore.bookTable.defaultTableModel.removeRow(rowSelected);
-
-        /* Also from ArrayList */
-        bookDataClassArrayList.remove(rowSelected);
-
-        clearInputFields();
-
-        /* DeSelect row */
-        bookStore.bookTable.bookTable.getSelectionModel().clearSelection();
-
-        /* Reset ID Field which  was changed when Row selected */
-        bookStore.addBookPanel.tfBookID.setEditable(true);
-        Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-        bookStore.addBookPanel.tfBookID.setCursor(cursor);
-
-        ShowToastOnOperation("Data deleted Successfully  !!");
     }
 
     private void doCancelOperation() {

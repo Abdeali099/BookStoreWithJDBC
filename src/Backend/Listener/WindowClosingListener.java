@@ -6,6 +6,9 @@ import Backend.DataBaseConnection.CreateConnection;
 import Frontend.BookStore;
 import javax.swing.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
@@ -29,8 +32,21 @@ public class WindowClosingListener {
 
                  /* Close connection With DataBase */
                  try {
+                     /* Fetching all Statement and Result set to close !! */
+                     ArrayList<PreparedStatement> arrayList=BookActionListener.giveStatementForClosing();
+
+                     arrayList.forEach(preparedStatement -> {
+                         try {
+                             preparedStatement.close();
+                         } catch (Exception e) {
+                             System.out.println("=> Error when closing " + e);
+                         }
+                     });
+
+                     /* Closing connection with Database */
                      Connection connection = CreateConnection.getConnection();
                      connection.close();
+
                  } catch (Exception e) {
                      System.out.println("Error at closing Connection : " + e);
                  }

@@ -193,7 +193,6 @@ public class BookActionListener implements ActionListener {
             System.out.println("Error  at Fetching data Listener : " + e.getMessage());
         }//catch close
         finally {
-            psFetchAllData.close();
             if (resultSet!=null) {
                 resultSet.close();
             }
@@ -244,9 +243,7 @@ public class BookActionListener implements ActionListener {
                 return;
             }
         }//catch close
-        finally {
-            psAddOneBookData.close();
-        }
+
 
         /* Data of Book (Modal) */
         BookDataClass bookDataClass = new BookDataClass(bookId,bookName,bookSubject,authorName,publication,dateOfPublication,bookPrice,bookQuantity,totalCost,bookCoverPath);
@@ -396,11 +393,6 @@ public class BookActionListener implements ActionListener {
         } catch (Exception e) {
             System.out.println("Error at updating database : - " + e);
         }
-        finally {
-            psUpdateOneBookData.close();
-        }
-
-
     }
 
     /* <------------ Deleting  One data ------------>*/
@@ -470,7 +462,6 @@ public class BookActionListener implements ActionListener {
 
         } catch (Exception e) {
             System.out.println("Error at deleting data : " + e);
-            psDeleteOneBookData.close();
         }
     }
 
@@ -533,6 +524,7 @@ public class BookActionListener implements ActionListener {
         bookStore.addBookPanel.tfPublication.setText("");
 
         DateChooser dateChooser = bookStore.addBookPanel.dateChooser;
+        dateChooser.setDateFormat("yyyy-MM-dd");
         dateChooser.setTextRefernce(bookStore.addBookPanel.tfDatePublication);
         dateChooser.setSelectedDate(new Date());
 
@@ -636,6 +628,17 @@ public class BookActionListener implements ActionListener {
 
     public static ArrayList<BookDataClass> giveDataWhenRowSelected() {
         return bookDataClassArrayList;
+    }
+
+    public static ArrayList<PreparedStatement> giveStatementForClosing(){
+        ArrayList<PreparedStatement> arrayList=new ArrayList<>();
+
+        arrayList.add(psFetchAllData);
+        arrayList.add(psAddOneBookData);
+        arrayList.add(psDeleteOneBookData);
+        arrayList.add(psUpdateOneBookData);
+
+        return arrayList;
     }
 
     private void ShowToastOnOperation(String operationDone) {
